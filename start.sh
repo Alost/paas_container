@@ -724,7 +724,7 @@ run_ct() {
         run_mc_player
       ) &
     fi
-    eval $ROOTFS_FRONTEND_COMMAND
+    eval "$ROOTFS_FRONTEND_COMMAND"
   fi
 }
 start_ct() {
@@ -733,7 +733,7 @@ start_ct() {
     ct_exec bash -i -c 'run_ct'
   else
     ct_exec_daemon bash -i -c 'run_ct'
-    eval $FRONTEND_COMMAND
+    eval "$FRONTEND_COMMAND"
   fi
 }
 
