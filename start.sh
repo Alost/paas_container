@@ -111,12 +111,14 @@ export RUN_MC_PLAYER=${RUN_MC_PLAYER:-0}
 export REBOOT_INTERVAL_SECS=${REBOOT_INTERVAL_SECS:-0}
 export PD_ENVS="PORT ROOTFS_PKGS SUPERVISORD_DAEMON ROOTFS_FRONTEND_COMMAND SSLH_SSH_PORT SSLH_HTTP_PORT SSLH_TLS_PORT SSLH_DEFAULT_PORT SSH_PWD SSH_PUBKEY HTTP_FILE HTTP_GOTTY_AUTH CLOUDFLARED_PORT CLOUDFLARED_TOKEN KOMARI_AGENT_ENDPOINT KOMARI_AGENT_TOKEN KOMARI_AGENT_COMMAND RUN_MC_PLAYER REBOOT_INTERVAL_SECS"
 
-: >"$SCRIPT_DIR/.pd_env"
-for v in $PD_ENVS; do
-  if [ -n "${!v+x}" ]; then
-    printf "%s='%s'\n" "$v" "$(printf '%s' "${!v}" | sed "s/'/'\\\\''/g")" >>"$SCRIPT_DIR/.pd_env"
-  fi
-done
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  : >"$SCRIPT_DIR/.pd_env"
+  for v in $PD_ENVS; do
+    if [ -n "${!v+x}" ]; then
+      printf "%s='%s'\n" "$v" "$(printf '%s' "${!v}" | sed "s/'/'\\\\''/g")" >>"$SCRIPT_DIR/.pd_env"
+    fi
+  done
+fi
 
 read -r -a envs_arr <<<"ROOT HOST_GOTTY IMAGE PORT_NAME PD_DAEMON $PD_ENVS PD_ENVS"
 for v in "${envs_arr[@]}"; do
