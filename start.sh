@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export HOME="${HOME:-$(eval echo ~)}" || export HOME="/root"
+
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 
 log() {
