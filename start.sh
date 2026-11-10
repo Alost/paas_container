@@ -255,16 +255,16 @@ pip_install() {
 }
 install_python() {
   log "install python"
-  if [[ "$(python3 -c 'import sys; print(sys.prefix)' 2>/dev/null)" == "$ROOT/.local/share/uv/python"* ]]; then
+  if [[ "$(python3 -c 'import sys; print(sys.prefix)' 2>/dev/null)" == "$HOME/.local/share/uv/python"* ]]; then
     pyinfo
     return 0
   fi
-  rm -rf $ROOT/.local/share/uv
+  rm -rf ~/.local/share/uv
   download "$TMP_DIR/uv.tar.gz" https://github.com/astral-sh/uv/releases/download/0.13.1/uv-$(arch)-unknown-linux-musl.tar.gz
   tar xzf "$TMP_DIR/uv.tar.gz" -C "$BIN_DIR" --strip-components=1
   chmod +x "$BIN_DIR/uv"
   uv python install 3.15 --default
-  cd $ROOT/.local/bin
+  cd ~/.local/bin
   rm python python3 python3.15
   ln -s ../share/uv/python$(uv python find | sed "s|^$(uv python dir)||") python3.15
   ln -s python3.15 python3
