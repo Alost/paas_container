@@ -261,7 +261,7 @@ install_python() {
     pyinfo
     return 0
   fi
-  rm -rf ~/.local/share/uv
+  rm -rf ~/.local/share/uv || true
   download "$TMP_DIR/uv.tar.gz" https://github.com/astral-sh/uv/releases/download/0.13.1/uv-$(arch)-unknown-linux-musl.tar.gz
   tar xzf "$TMP_DIR/uv.tar.gz" -C "$BIN_DIR" --strip-components=1
   chmod +x "$BIN_DIR/uv"
