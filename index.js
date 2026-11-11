@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 
 const SCRIPT = path.join(__dirname, "start.sh");
 const args = fs.existsSync(SCRIPT) ? [SCRIPT] : ["-i"];
