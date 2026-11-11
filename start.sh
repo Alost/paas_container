@@ -240,8 +240,8 @@ sync_repo() {
 clean() {
   pd remove ct || true
   uv pip uninstall -y proot-distro || true
-  rm -rf ~/.cache ~/.local
-  rm -rf $BIN_DIR $TMP_DIR $LOG_DIR $ROOT/.myrc
+  rm -rf ~/.cache ~/.local || true
+  rm -rf $BIN_DIR $TMP_DIR $LOG_DIR $ROOT/.myrc || true
 }
 
 pyinfo() {
