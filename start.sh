@@ -348,7 +348,6 @@ install_proot-distro() {
   uv tool install proot-distro
   pd install -q $IMAGE --name ct
   pd list
-  pd login ct -- id
   ct_exec id
   ct_exec bash -s <<EOF
 set -euxo pipefail
