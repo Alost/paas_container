@@ -363,7 +363,7 @@ EOF
   # ~/.local/share/proot-distro/containers
 }
 ct_shell() {
-  local -a envs=()
+  local -a envs=(-e "PROOT_TMP_DIR=$TMP_DIR")
   local v
   for v in $PD_ENVS; do
     envs+=(-e "$v=${!v-}")
