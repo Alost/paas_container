@@ -331,6 +331,7 @@ run_host_gotty() {
 install_proot() {
   log "install proot"
   export PROOT_NO_SECCOMP=1
+  export PROOT_TMP_DIR="$TMP_DIR"
   if [ -x "$BIN_DIR/proot" ]; then
     return 0
   fi
