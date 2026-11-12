@@ -53,6 +53,7 @@ print_info() {
   curl http://ip.cloudflare.nyc.mn?lang=zh-CN -4
   curl http://ip.cloudflare.nyc.mn?lang=zh-CN -6
   ss -tulnp
+  cat /proc/self/status | grep CapEff
   log "--------------------print basic info end--------------------"
 }
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
