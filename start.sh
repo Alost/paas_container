@@ -747,7 +747,11 @@ run_ct() {
     if [ "$RUN_MC_PLAYER" = 1 ]; then
       nohup bash -i -c 'sleep 60; run_mc_player' &
     fi
-    eval "$ROOTFS_FRONTEND_COMMAND"
+    while true; do
+      eval "$ROOTFS_FRONTEND_COMMAND"
+      log "frontend command exit with code $?, wait restart"
+      sleep 3
+    done
   fi
 }
 start_ct() {
