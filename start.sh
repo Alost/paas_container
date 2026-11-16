@@ -87,7 +87,7 @@ if [ -f "$SCRIPT_DIR/.env" ]; then
 fi
 
 export ROOT=${ROOT:-$SCRIPT_DIR}
-export HOST_GOTTY=${HOST_GOTTY:-0}
+export HOST_WSH=${HOST_WSH:-0}
 export IMAGE=${IMAGE:-ubuntu:26.04}
 export PORT_NAME=${PORT_NAME:-}
 export PORT=${PORT:-${SERVER_PORT:-${APP_PORT:-${SERVICE_PORT:-${SRV_PORT:-5000}}}}}
@@ -104,7 +104,7 @@ export SSLH_DEFAULT_PORT=${SSLH_DEFAULT_PORT:-8000}
 export SSH_PWD=${SSH_PWD:-}
 export SSH_PUBKEY=${SSH_PUBKEY:-$DEFAULT_SSH_PUBKEY}
 export HTTP_FILE=${HTTP_FILE:-0}
-export HTTP_GOTTY_AUTH=${HTTP_GOTTY_AUTH:-}
+export HTTP_WSH_AUTH=${HTTP_WSH_AUTH:-}
 export CLOUDFLARED_PORT=${CLOUDFLARED_PORT:-}
 export CLOUDFLARED_TOKEN=${CLOUDFLARED_TOKEN:-}
 export KOMARI_AGENT_ENDPOINT=${KOMARI_AGENT_ENDPOINT:-}
@@ -112,7 +112,7 @@ export KOMARI_AGENT_TOKEN=${KOMARI_AGENT_TOKEN:-}
 export KOMARI_AGENT_COMMAND=${KOMARI_AGENT_COMMAND:-'agent -e ${KOMARI_AGENT_ENDPOINT} -i 5 -t ${KOMARI_AGENT_TOKEN}'}
 export RUN_MC_PLAYER=${RUN_MC_PLAYER:-0}
 export REBOOT_INTERVAL_SECS=${REBOOT_INTERVAL_SECS:-0}
-export PD_ENVS="PORT ROOTFS_PKGS SUPERVISORD_DAEMON ROOTFS_FRONTEND_COMMAND SSLH_SSH_PORT SSLH_HTTP_PORT SSLH_TLS_PORT SSLH_DEFAULT_PORT SSH_PWD SSH_PUBKEY HTTP_FILE HTTP_GOTTY_AUTH CLOUDFLARED_PORT CLOUDFLARED_TOKEN KOMARI_AGENT_ENDPOINT KOMARI_AGENT_TOKEN KOMARI_AGENT_COMMAND RUN_MC_PLAYER REBOOT_INTERVAL_SECS"
+export PD_ENVS="PORT ROOTFS_PKGS SUPERVISORD_DAEMON ROOTFS_FRONTEND_COMMAND SSLH_SSH_PORT SSLH_HTTP_PORT SSLH_TLS_PORT SSLH_DEFAULT_PORT SSH_PWD SSH_PUBKEY HTTP_FILE HTTP_WSH_AUTH CLOUDFLARED_PORT CLOUDFLARED_TOKEN KOMARI_AGENT_ENDPOINT KOMARI_AGENT_TOKEN KOMARI_AGENT_COMMAND RUN_MC_PLAYER REBOOT_INTERVAL_SECS"
 
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   : >"$SCRIPT_DIR/.pd_env"
@@ -123,7 +123,7 @@ if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   done
 fi
 
-read -r -a envs_arr <<<"ROOT HOST_GOTTY IMAGE PORT_NAME PD_DAEMON $PD_ENVS PD_ENVS"
+read -r -a envs_arr <<<"ROOT HOST_WSH IMAGE PORT_NAME PD_DAEMON $PD_ENVS PD_ENVS"
 for v in "${envs_arr[@]}"; do
   log "$v: ${!v-}"
 done
@@ -316,18 +316,20 @@ EOF
   esac
 }
 
-install_gotty() {
-  log "install gotty"
-  if have gotty; then
+install_ttyd() {
+  log "install ttyd"
+  if have ttyd; then
     return 0
   fi
-  download "$TMP_DIR/gotty.tar.gz" https://github.com/sorenisanerd/gotty/releases/download/v1.10.0/gotty_v1.10.0_linux_$(dpkg --print-architecture).tar.gz
-  tar xzf "$TMP_DIR/gotty.tar.gz" -C "$BIN_DIR"
-  chmod +x "$BIN_DIR/gotty"
+  download $BIN_DIR/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.$(arch)
+  chmod +x "$BIN_DIR/ttyd"
 }
-run_host_gotty() {
-  install_gotty
-  gotty -p $PORT -w -c root:toor /bin/bash
+run_host_ttyd() {
+  install_ttyd
+  ttyd -p $PORT -W -c root:toor /bin/bash
+}
+run_host_wsh() {
+  run_host_ttyd
 }
 install_proot() {
   log "install proot"
@@ -628,10 +630,10 @@ run_http_file() {
   log "run http file"
   add_supervisor_service http_file "python3 -u -m http.server $SSLH_HTTP_PORT"
 }
-run_http_gotty() {
-  log "run http gotty"
-  install_gotty
-  add_supervisor_service http_gotty "gotty -p $SSLH_HTTP_PORT -w -c $HTTP_GOTTY_AUTH /bin/bash"
+run_http_wsh() {
+  log "run http wsh"
+  install_ttyd
+  add_supervisor_service http_wsh "ttyd -p $SSLH_HTTP_PORT -W -c $HTTP_WSH_AUTH /bin/bash"
 }
 install_cloudflared() {
   log "install cloudflared"
@@ -724,8 +726,8 @@ run_ct() {
 
   if [ "$HTTP_FILE" = 1 ]; then
     run_http_file
-  elif [ -n "$HTTP_GOTTY_AUTH" ]; then
-    run_http_gotty
+  elif [ -n "$HTTP_WSH_AUTH" ]; then
+    run_http_wsh
   fi
 
   if [ -n "$CLOUDFLARED_PORT" ] || [ -n "$CLOUDFLARED_TOKEN" ]; then
@@ -770,8 +772,8 @@ main() {
 
   subreaper
 
-  if [ "$HOST_GOTTY" = 1 ]; then
-    run_host_gotty
+  if [ "$HOST_WSH" = 1 ]; then
+    run_host_wsh
     return $?
   fi
 
