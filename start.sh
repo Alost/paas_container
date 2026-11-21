@@ -358,6 +358,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -y -qq
 # gnu-which for which, busybox for tar
 apt-get install -y -qq gnu-which busybox
+cp -f /usr/bin/which.gnu /root/.bin/which
 apt-get install -y -qq --no-install-recommends curl wget nano vim iproute2 less iputils-ping net-tools git psmisc
 [ -z "$ROOTFS_PKGS" ] || apt-get install -y -qq --no-install-recommends ${ROOTFS_PKGS}
 echo "127.0.1.1 $(hostname)" >> /etc/hosts
