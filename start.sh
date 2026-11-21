@@ -635,6 +635,23 @@ run_http_wsh() {
   install_ttyd
   add_supervisor_service http_wsh "ttyd -p $SSLH_HTTP_PORT -W -c $HTTP_WSH_AUTH /bin/bash"
 }
+run_http_hello() {
+  log "run http hello"
+  cat >"$BIN_DIR/http_hello.py" <<'EOF'
+import sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(f"{self.command} {self.path}\n{self.headers}".encode("utf-8"))
+port = int(sys.argv[1])
+HTTPServer(("0.0.0.0", port), Handler).serve_forever()
+EOF
+  install_python
+  add_supervisor_service http_hello "/root/.local/bin/python -u $BIN_DIR/http_hello.py $SSLH_HTTP_PORT"
+}
 install_cloudflared() {
   log "install cloudflared"
   if have cfd; then
@@ -728,6 +745,8 @@ run_ct() {
     run_http_file
   elif [ -n "$HTTP_WSH_AUTH" ]; then
     run_http_wsh
+  else
+    run_http_hello
   fi
 
   if [ -n "$CLOUDFLARED_PORT" ] || [ -n "$CLOUDFLARED_TOKEN" ]; then
